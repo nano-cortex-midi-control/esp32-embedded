@@ -1,0 +1,53 @@
+{
+  "type": "set_config",
+  "switches": [
+    {
+      "id": 0,
+      "name": "Distortion",
+      "channel": 1,
+      "cc": 20,
+      "value": 127,
+      "enabled": true
+    },
+    {
+      "id": 1,
+      "name": "Chorus",
+      "channel": 1,
+      "cc": 21,
+      "value": 100,
+      "enabled": true
+    },
+    {
+      "id": 2,
+      "name": "Reverb",
+      "channel": 1,
+      "cc": 22,
+      "value": 80,
+      "enabled": true
+    },
+    {
+      "id": 3,
+      "name": "Delay",
+      "channel": 1,
+      "cc": 23,
+      "value": 90,
+      "enabled": true
+    },
+    {
+      "id": 4,
+      "name": "Wah",
+      "channel": 1,
+      "cc": 24,
+      "value": 127,
+      "enabled": false
+    },
+    {
+      "id": 5,
+      "name": "Boost",
+      "channel": 1,
+      "cc": 25,
+      "value": 127,
+      "enabled": true
+    }
+  ]
+}
