@@ -7,7 +7,8 @@
       "channel": 1,
       "cc": 20,
       "value": 127,
-      "enabled": true
+      "enabled": true,
+      "color": "#FF4500"
     },
     {
       "id": 1,
@@ -15,7 +16,8 @@
       "channel": 1,
       "cc": 21,
       "value": 100,
-      "enabled": true
+      "enabled": true,
+      "color": "#00BFFF"
     },
     {
       "id": 2,
@@ -23,7 +25,8 @@
       "channel": 1,
       "cc": 22,
       "value": 80,
-      "enabled": true
+      "enabled": true,
+      "color": "#9932CC"
     },
     {
       "id": 3,
@@ -31,7 +34,8 @@
       "channel": 1,
       "cc": 23,
       "value": 90,
-      "enabled": true
+      "enabled": true,
+      "color": "#32CD32"
     },
     {
       "id": 4,
@@ -39,7 +43,8 @@
       "channel": 1,
       "cc": 24,
       "value": 127,
-      "enabled": false
+      "enabled": false,
+      "color": "#FFD700"
     },
     {
       "id": 5,
@@ -47,7 +52,8 @@
       "channel": 1,
       "cc": 25,
       "value": 127,
-      "enabled": true
+      "enabled": true,
+      "color": "#DC143C"
     }
   ]
 }
