@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <MIDI.h>
+#include <HardwareSerial.h>
 
 // Configuration constants
 #define NUM_FOOTSWITCHES 6
@@ -38,6 +40,9 @@ struct FootswitchConfig {
     uint16_t color;  // RGB565 color value
 };
 
+// Forward declaration for MIDI
+extern midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> MIDI;
+
 // External variable declarations
 extern const int FOOTSWITCH_PINS[NUM_FOOTSWITCHES];
 extern FootswitchConfig footswitches[NUM_FOOTSWITCHES];
@@ -46,20 +51,9 @@ extern bool lastFootswitchStates[NUM_FOOTSWITCHES];
 extern unsigned long lastDebounceTime[NUM_FOOTSWITCHES];
 
 // Function declarations
-void printJsonLog(const String &type, const String &message);
-void initializeDefaultConfig();
-void saveConfigToFlash();
-void loadConfigFromFlash();
-void sendCurrentConfig();
-void processUartCommand(String command);
+void initializeMIDI();
 void sendMidiCC(int switchIndex);
 void handleFootswitches();
-
-// Display function declarations
-void initializeDisplays();
-void updateFootswitchDisplay();
-void updateConfigDisplay();
-void drawFootswitchScreen();
-void drawConfigScreen();
+void initializeFootswitchPins();
 
 #endif // MIDI_CONTROLLER_H

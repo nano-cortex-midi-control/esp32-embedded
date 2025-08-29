@@ -1,53 +1,70 @@
 # ESP32 MIDI Footswitch Controller
 
-A configurable 6-footswitch MIDI controller for ESP32 with JSON-based configuration over UART.
+A configurable 6-footswitch MIDI controller for ESP32 with dual TFT displays and JSON-based configuration over UART.
 
 ## Features
 
-    - 6 configurable footswitches
-    - TRS MIDI output on Serial2 (pins 16/17)
-    - JSON configuration storage in flash memory
-    - UART communication for configuration editing
-    - Debounced switch input
-    - Individual switch enable/disable
-    - Configurable MIDI channel, CC number, and value per switch
+- 6 configurable footswitches with debouncing
+- TRS MIDI output on Serial2 (pins 16/17)
+- Dual TFT displays for footswitch states and configuration info
+- JSON configuration storage in flash memory
+- UART communication for configuration editing
+- Individual switch enable/disable
+- Configurable MIDI channel, CC number, and value per switch
+- Color-coded footswitch display
+- LED feedback for command confirmation
+
+## Project Structure
+
+The project has been organized into multiple modules for better maintainability:
+
+- `main.cpp` - Main setup and loop
+- `midi_controller.cpp` - MIDI and footswitch handling
+- `config.cpp` - Configuration management and UART commands
+- `display.cpp` - TFT display functions
+- `utils.cpp` - Utility functions (logging, LED, colors)
+
+See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed documentation.
 
 ## Hardware Setup
 
 ### Footswitch Connections
-    - Switch 1: GPIO 2
-    - Switch 2: GPIO 4
-    - Switch 3: GPIO 5
-    - Switch 4: GPIO 18
-    - Switch 5: GPIO 19
-    - Switch 6: GPIO 21
+- Switch 1: GPIO 13
+- Switch 2: GPIO 12  
+- Switch 3: GPIO 14
+- Switch 4: GPIO 27
+- Switch 5: GPIO 26
+- Switch 6: GPIO 25
 
-    Connect switches between GPIO pins and GND (internal pull-up resistors are enabled).
+Connect switches between GPIO pins and GND (internal pull-up resistors are enabled).
 
 ### MIDI Output
-    - MIDI TX: GPIO 17 (Serial2)
-    - MIDI RX: GPIO 16 (Serial2) - not used but available
-    - Use standard MIDI TRS wiring (31.25kbaud)
+- MIDI TX: GPIO 17 (Serial2)
+- MIDI RX: GPIO 16 (Serial2) - not used but available
+- Use standard MIDI TRS wiring (31.25kbaud)
 
-### UART Configuration
-    - USB Serial connection at 115200 baud
-    - Send JSON commands terminated with newline
+### TFT Displays
+- Display 1 (Footswitch states): CS on GPIO 5
+- Display 2 (Configuration info): CS on GPIO 15
+
+### LED Feedback
+- Status LED: GPIO 2
 
 ## UART Communication Protocol
 
 ### Get Current Configuration
-    ```json
-    {"type": "get_config"}
-    ```
+```json
+{"type": "get_config"}
+```
 
 **Response:**
-    ```json
+```json
+{
+  "type": "config",
+  "status": "success",
+  "switches": [
     {
-      "type": "config",
-      "status": "success",
-      "switches": [
-        {
-          "id": 0,
+      "id": 0,
           "name": "Switch 1",
           "channel": 1,
           "cc": 20,
