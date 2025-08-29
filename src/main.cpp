@@ -27,6 +27,9 @@ void setup() {
 
     printJsonLog("info", "Ready for UART commands and footswitch input");
     printJsonLog("info", "Send JSON commands via UART for configuration");
+
+    updateConfigDisplay();
+    updateFootswitchDisplay();
 }
 
 void loop() {

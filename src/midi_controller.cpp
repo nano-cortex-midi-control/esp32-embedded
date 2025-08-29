@@ -13,6 +13,7 @@ FootswitchConfig footswitches[NUM_FOOTSWITCHES];
 bool footswitchStates[NUM_FOOTSWITCHES] = {false};
 bool lastFootswitchStates[NUM_FOOTSWITCHES] = {false};
 unsigned long lastDebounceTime[NUM_FOOTSWITCHES] = {0};
+int currentSelectedFootswitch = -1;
 
 void initializeMIDI() {
     // Initialize MIDI on Serial2 (pins 16=RX, 17=TX)
@@ -59,21 +60,22 @@ void handleFootswitches() {
         if ((millis() - lastDebounceTime[i]) > DEBOUNCE_DELAY) {
             // If the button state has changed
             if (reading != footswitchStates[i]) {
-                footswitchStates[i] = reading;
-                displayNeedsUpdate = true;
-
-                // Send MIDI on button press (LOW because of pull-up)
-                if (footswitchStates[i] == LOW) {
+                // Button released (transition from LOW to HIGH)
+                if (footswitchStates[i] == LOW && reading == HIGH) {
+                    currentSelectedFootswitch = i;
+                    displayNeedsUpdate = true;
                     sendMidiCC(i);
                 }
+                footswitchStates[i] = reading;
             }
         }
 
         lastFootswitchStates[i] = reading;
     }
     
-    // Update display if any footswitch state changed
+    // Update display if any footswitch state changed (on release only)
     if (displayNeedsUpdate) {
-        updateFootswitchDisplay();
+        // updateFootswitchDisplay();
+        updateConfigDisplay();
     }
 }

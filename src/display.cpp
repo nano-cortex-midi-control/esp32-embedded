@@ -85,11 +85,8 @@ void drawConfigScreen() {
     
     // Find the first enabled footswitch color for background
     uint16_t backgroundColor = BLACK;
-    for (int i = 0; i < NUM_FOOTSWITCHES; i++) {
-        if (footswitchStates[i]) {
-            backgroundColor = footswitches[i].color;
-            break;
-        }
+    if (currentSelectedFootswitch != -1) {
+        backgroundColor = footswitches[currentSelectedFootswitch].color;
     }
     
     // Fill background with selected preset color

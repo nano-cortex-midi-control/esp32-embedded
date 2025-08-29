@@ -49,6 +49,8 @@ extern FootswitchConfig footswitches[NUM_FOOTSWITCHES];
 extern bool footswitchStates[NUM_FOOTSWITCHES];
 extern bool lastFootswitchStates[NUM_FOOTSWITCHES];
 extern unsigned long lastDebounceTime[NUM_FOOTSWITCHES];
+// Track currently selected footswitch (-1 if none)
+extern int currentSelectedFootswitch;
 
 // Function declarations
 void initializeMIDI();
