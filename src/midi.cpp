@@ -10,7 +10,7 @@ FootswitchConfig footswitches[NUM_FOOTSWITCHES];
 
 void initializeMIDI() {
     // Initialize MIDI on Serial2 (pins 16=RX, 17=TX)
-    Serial2.begin(31250, SERIAL_8N1, 16, 17);
+    Serial2.begin(MIDI_BAUD_RATE, SERIAL_8N1, MIDI_RX_PIN, MIDI_TX_PIN);
     MIDI.begin();
     printJsonLog("info", "MIDI initialized");
 }

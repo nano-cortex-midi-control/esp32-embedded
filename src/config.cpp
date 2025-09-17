@@ -6,10 +6,6 @@
 // Preferences for storing configuration
 Preferences preferences;
 
-// UART communication buffer
-String uartBuffer = "";
-bool uartComplete = false;
-
 void initializeDefaultConfig() {
     // Set default configuration for each footswitch with more descriptive names
     String defaultNames[] = {"CLEAN", "CRUNCH", "AMBIENT", "LOOP", "SOLO", "RHYTHM"};

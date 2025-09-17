@@ -8,10 +8,16 @@
 #define DEBOUNCE_DELAY 50
 
 // Footswitch pin array and state tracking
-extern const int FOOTSWITCH_PINS[NUM_FOOTSWITCHES];
-extern bool footswitchStates[NUM_FOOTSWITCHES];
-extern bool lastFootswitchStates[NUM_FOOTSWITCHES];
-extern unsigned long lastDebounceTime[NUM_FOOTSWITCHES];
+// extern const int FOOTSWITCH_PINS[NUM_FOOTSWITCHES];
+// extern bool footswitchStates[NUM_FOOTSWITCHES];
+// extern bool lastFootswitchStates[NUM_FOOTSWITCHES];
+// extern unsigned long lastDebounceTime[NUM_FOOTSWITCHES];
+
+extern int lastPressedFootswitch;
+extern unsigned long lastDebounceTime;
+extern int currentSelectedFootswitch;
+extern bool isConfiguring;
+extern unsigned long configuringStartTime;
 
 // Track currently selected footswitch (-1 if none)
 extern int currentSelectedFootswitch;

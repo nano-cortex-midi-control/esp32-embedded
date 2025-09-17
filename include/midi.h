@@ -7,18 +7,8 @@
 #include <HardwareSerial.h>
 
 // Configuration constants
-#define NUM_FOOTSWITCHES 6
-#define DEBOUNCE_DELAY 50
 #define MIDI_BAUD_RATE 31250
 #define UART_BAUD_RATE 115200
-
-// MIDI pins
-#define MIDI_TX_PIN 17
-#define MIDI_RX_PIN 16
-
-// Display pins
-#define TFT_CS1 5   // CS pin for first display (footswitch states)
-#define TFT_CS2 15  // CS pin for second display (bank/config info)
 
 // Color definitions
 #define BLACK   0x0000
