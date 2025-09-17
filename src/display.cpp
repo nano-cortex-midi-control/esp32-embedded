@@ -6,27 +6,50 @@
 MultiTFT footswitchDisplay(TFT_CS1);  // Display for footswitch states
 MultiTFT configDisplay(TFT_CS2);      // Display for bank/config info
 
+// Helper: extract RGB components from RGB565 and compute brightness
+static uint16_t computeBrightnessFromRGB565(uint16_t color) {
+    uint8_t r = (color >> 8) & 0xF8;
+    uint8_t g = (color >> 3) & 0xFC;
+    uint8_t b = (color << 3) & 0xF8;
+    return (r * 299 + g * 587 + b * 114) / 1000;
+}
+
 // Helper function for determining text color based on background brightness
 uint16_t getTextColorForBackground(uint16_t backgroundColor) {
-    // Extract RGB components from RGB565
-    uint8_t r = (backgroundColor >> 8) & 0xF8;
-    uint8_t g = (backgroundColor >> 3) & 0xFC;
-    uint8_t b = (backgroundColor << 3) & 0xF8;
-    
-    // Calculate brightness using standard formula
-    uint16_t brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    
-    // Use black text for bright colors, white text for dark colors
+    uint16_t brightness = computeBrightnessFromRGB565(backgroundColor);
     return (brightness > 128) ? BLACK : WHITE;
+}
+
+// Small helper to draw a centered title on a display
+static void drawCenteredTitle(MultiTFT &display, const String &text, uint16_t color, int y) {
+    display.setTextDatum(MC_DATUM);
+    display.setTextColor(color);
+    display.setTextSize(4);
+    display.drawString(text, 240, y);
 }
 
 // Display initialization
 void initializeDisplays() {
-    // Initialize both displays
     footswitchDisplay.begin(1); // Landscape
     configDisplay.begin(3);     // Landscape (rotated)
-    
     printJsonLog("info", "Displays initialized");
+}
+
+// Internal: draw a single footswitch tile at x,y with given dimensions
+static void drawFootswitchTile(MultiTFT &display, int x, int y, int w, int h, const FootswitchConfig &fs) {
+    uint16_t bgColor = fs.enabled ? fs.color : BLACK;
+    uint16_t textColor = fs.enabled ? getTextColorForBackground(fs.color) : RED;
+
+    display.fillRect(x, y, w, h, bgColor);
+    display.drawRect(x, y, w, h, WHITE);
+
+    display.setTextColor(textColor);
+    display.setTextSize(3);
+    display.setTextDatum(MC_DATUM);
+    display.drawString(fs.name, x + w / 2, y + 30);
+
+    display.setTextSize(2);
+    display.drawString("CC" + String(fs.midiCC) + " Ch" + String(fs.midiChannel), x + w / 2, y + 65);
 }
 
 // Draw the footswitch states screen (based on ST7796 current state screen)
@@ -35,42 +58,18 @@ void drawFootswitchScreen() {
     footswitchDisplay.fillScreen(BLACK);
     footswitchDisplay.drawRect(0, 0, 480, 320, WHITE);
 
-    // Define switch dimensions and positions for 2x3 grid (2 columns, 3 rows)
-    int switch_width = 220;
-    int switch_height = 90;
-    int margin = 10;
+    const int switch_width = 220;
+    const int switch_height = 90;
 
-    // Row Y positions (3 rows)
-    int row1_y = 10;
-    int row2_y = 115;
-    int row3_y = 220;
+    const int row_y[] = {10, 115, 220};
+    const int col_x[] = {10, 250};
 
-    // Column X positions (2 columns)
-    int left_col_x = 10;
-    int right_col_x = 250;
-
-    // Draw switches in a 2x3 grid
-    for (int i = 0; i < NUM_FOOTSWITCHES; i++) {
-        int row = i / 2;  // 0, 1, 2
-        int col = i % 2;  // 0, 1
-        
-        int x = (col == 0) ? left_col_x : right_col_x;
-        int y = (row == 0) ? row1_y : (row == 1) ? row2_y : row3_y;
-        
-        uint16_t bgColor = footswitches[i].enabled ? footswitches[i].color : BLACK;
-        uint16_t textColor = footswitches[i].enabled ? 
-                            getTextColorForBackground(footswitches[i].color) : RED;
-        
-        footswitchDisplay.fillRect(x, y, switch_width, switch_height, bgColor);
-        footswitchDisplay.drawRect(x, y, switch_width, switch_height, WHITE);
-        footswitchDisplay.setTextColor(textColor);
-        footswitchDisplay.setTextSize(3);
-        footswitchDisplay.setTextDatum(MC_DATUM);
-        footswitchDisplay.drawString(footswitches[i].name, 
-                                   x + switch_width/2, y + 30);
-        footswitchDisplay.setTextSize(2);
-        footswitchDisplay.drawString("CC" + String(footswitches[i].midiCC) + " Ch" + String(footswitches[i].midiChannel), 
-                                   x + switch_width/2, y + 65);
+    for (int i = 0; i < NUM_FOOTSWITCHES; ++i) {
+        int row = i / 2;
+        int col = i % 2;
+        int x = col_x[col];
+        int y = row_y[row];
+        drawFootswitchTile(footswitchDisplay, x, y, switch_width, switch_height, footswitches[i]);
     }
 
     footswitchDisplay.deselect();
@@ -79,65 +78,58 @@ void drawFootswitchScreen() {
 // Draw the configuration/bank screen (based on ST7796 bank list screen)
 void drawConfigScreen() {
     configDisplay.select();
-    
-    // Find the first enabled footswitch color for background
+
+    // Determine background color; if no selection use BLACK
     uint16_t backgroundColor = BLACK;
-    if (currentSelectedFootswitch != -1) {
+    if (currentSelectedFootswitch >= 0 && currentSelectedFootswitch < NUM_FOOTSWITCHES) {
         backgroundColor = footswitches[currentSelectedFootswitch].color;
     }
-    
-    // Fill background with selected preset color
+
     configDisplay.fillScreen(backgroundColor);
-    
-    // Determine text color based on background brightness
+
     uint16_t primaryTextColor = getTextColorForBackground(backgroundColor);
     uint16_t accentColor = (primaryTextColor == BLACK) ? WHITE : BLACK;
-    
+
     configDisplay.drawRect(0, 0, 480, 320, primaryTextColor);
 
-    // Title row (centered, big)
-    configDisplay.setTextDatum(MC_DATUM);
-    configDisplay.setTextColor(primaryTextColor);
-    configDisplay.setTextSize(4);
-    configDisplay.drawString(footswitches[currentSelectedFootswitch].name, 240, 40); // Centered at top
+    // Title (guard against invalid selection)
+    String title = "";
+    if (currentSelectedFootswitch >= 0 && currentSelectedFootswitch < NUM_FOOTSWITCHES) {
+        title = footswitches[currentSelectedFootswitch].name;
+    }
+    drawCenteredTitle(configDisplay, title, primaryTextColor, 40);
 
-    // Count active switches
+    // Count active switches and build truncated list
     int activeCount = 0;
     String activeNames = "";
-    for (int i = 0; i < NUM_FOOTSWITCHES; i++) {
+    for (int i = 0; i < NUM_FOOTSWITCHES; ++i) {
         if (footswitches[i].enabled) {
-            activeCount++;
+            ++activeCount;
             if (activeNames.length() > 0) activeNames += ", ";
             activeNames += footswitches[i].name;
         }
     }
 
-    // Active switches info
     configDisplay.setTextSize(2);
     configDisplay.setTextDatum(TL_DATUM);
     configDisplay.setTextColor(primaryTextColor);
     configDisplay.drawString("ACTIVE EFFECTS: " + String(activeCount), 20, 90);
-    
-    // Show active switch names (truncate if too long)
-    configDisplay.setTextSize(2);
+
     if (activeNames.length() > 35) {
         activeNames = activeNames.substring(0, 32) + "...";
     }
     configDisplay.drawString(activeNames, 20, 120);
 
-    // MIDI Channel info
+    // MIDI Channel info (uses footswitch 0 as original code did)
     configDisplay.setTextSize(3);
     configDisplay.setTextColor(accentColor);
     configDisplay.drawString("MIDI CH: " + String(footswitches[0].midiChannel), 20, 160);
-    
-    // Status indicator
+
+    // Status indicator and navigation
     configDisplay.setTextSize(2);
     configDisplay.setTextColor(primaryTextColor);
     configDisplay.drawString("SYSTEM READY", 20, 200);
 
-    // Navigation row (bottom)
-    configDisplay.setTextSize(2);
-    configDisplay.setTextColor(primaryTextColor);
     configDisplay.setTextDatum(TL_DATUM);
     configDisplay.drawString("<< PREV BANK", 30, 280);
     configDisplay.setTextDatum(TR_DATUM);
@@ -156,29 +148,27 @@ void updateConfigDisplay() {
     drawConfigScreen();
 }
 
+// Small helper to show a centered message on a display
+static void showCenteredMessage(MultiTFT &display, const char *message, uint16_t color, int y) {
+    display.fillScreen(BLACK);
+    display.drawRect(0, 0, 480, 320, WHITE);
+    display.setTextDatum(MC_DATUM);
+    display.setTextColor(color);
+    display.setTextSize(4);
+    display.drawString(message, 240, y);
+}
+
 // Show "CONFIGURING..." message on both displays
 void showConfiguringMessage() {
     isConfiguring = true;
     configuringStartTime = millis();
-    
-    // Update footswitch display with configuring message
+
     footswitchDisplay.select();
-    footswitchDisplay.fillScreen(BLACK);
-    footswitchDisplay.drawRect(0, 0, 480, 320, WHITE);
-    footswitchDisplay.setTextDatum(MC_DATUM);
-    footswitchDisplay.setTextColor(YELLOW);
-    footswitchDisplay.setTextSize(4);
-    footswitchDisplay.drawString("CONFIGURING...", 240, 160);
+    showCenteredMessage(footswitchDisplay, "CONFIGURING...", YELLOW, 160);
     footswitchDisplay.deselect();
-    
-    // Update config display with configuring message
+
     configDisplay.select();
-    configDisplay.fillScreen(BLACK);
-    configDisplay.drawRect(0, 0, 480, 320, WHITE);
-    configDisplay.setTextDatum(MC_DATUM);
-    configDisplay.setTextColor(YELLOW);
-    configDisplay.setTextSize(4);
-    configDisplay.drawString("CONFIGURING...", 240, 160);
+    showCenteredMessage(configDisplay, "CONFIGURING...", YELLOW, 160);
     configDisplay.deselect();
 }
 
@@ -191,7 +181,6 @@ void hideConfiguringMessage() {
 
 // Show loading screen on both displays
 void showLoadingScreen() {
-    // Show loading screen on footswitch display
     footswitchDisplay.select();
     footswitchDisplay.fillScreen(BLACK);
     footswitchDisplay.drawRect(0, 0, 480, 320, WHITE);
@@ -205,8 +194,7 @@ void showLoadingScreen() {
     footswitchDisplay.setTextSize(1);
     footswitchDisplay.drawString("Initializing System...", 240, 220);
     footswitchDisplay.deselect();
-    
-    // Show loading screen on config display
+
     configDisplay.select();
     configDisplay.fillScreen(BLACK);
     configDisplay.drawRect(0, 0, 480, 320, WHITE);
