@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include "midi_controller.h"  // For color definitions
+#include "midi.h"  // For color definitions
 
 // LED pin for feedback
 extern const int LED_PIN;

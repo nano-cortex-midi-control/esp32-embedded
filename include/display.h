@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "MultiTFT.hpp"
-#include "midi_controller.h"
+#include "midi.h"
 
 // Display objects
 extern MultiTFT footswitchDisplay;
@@ -15,6 +15,9 @@ void updateFootswitchDisplay();
 void updateConfigDisplay();
 void drawFootswitchScreen();
 void drawConfigScreen();
+void showConfiguringMessage();
+void hideConfiguringMessage();
+void showLoadingScreen();
 
 // Helper function for determining text color based on background brightness
 uint16_t getTextColorForBackground(uint16_t backgroundColor);

@@ -1,5 +1,6 @@
 #include "display.h"
 #include "utils.h"
+#include "switches.h"
 
 // Display setup
 MultiTFT footswitchDisplay(TFT_CS1);  // Display for footswitch states
@@ -24,10 +25,6 @@ void initializeDisplays() {
     // Initialize both displays
     footswitchDisplay.begin(1); // Landscape
     configDisplay.begin(3);     // Landscape (rotated)
-    
-    // Draw initial screens
-    drawFootswitchScreen();
-    drawConfigScreen();
     
     printJsonLog("info", "Displays initialized");
 }
@@ -102,7 +99,7 @@ void drawConfigScreen() {
     configDisplay.setTextDatum(MC_DATUM);
     configDisplay.setTextColor(primaryTextColor);
     configDisplay.setTextSize(4);
-    configDisplay.drawString("PRESET STATUS", 240, 40); // Centered at top
+    configDisplay.drawString(footswitches[currentSelectedFootswitch].name, 240, 40); // Centered at top
 
     // Count active switches
     int activeCount = 0;
@@ -142,9 +139,9 @@ void drawConfigScreen() {
     configDisplay.setTextSize(2);
     configDisplay.setTextColor(primaryTextColor);
     configDisplay.setTextDatum(TL_DATUM);
-    configDisplay.drawString("< CONFIG", 30, 280);
+    configDisplay.drawString("<< PREV BANK", 30, 280);
     configDisplay.setTextDatum(TR_DATUM);
-    configDisplay.drawString("SWITCHES >", 450, 280);
+    configDisplay.drawString("NEXT BANK >>", 450, 280);
 
     configDisplay.deselect();
 }
@@ -157,4 +154,70 @@ void updateFootswitchDisplay() {
 // Update config display (can be called when configuration changes)
 void updateConfigDisplay() {
     drawConfigScreen();
+}
+
+// Show "CONFIGURING..." message on both displays
+void showConfiguringMessage() {
+    isConfiguring = true;
+    configuringStartTime = millis();
+    
+    // Update footswitch display with configuring message
+    footswitchDisplay.select();
+    footswitchDisplay.fillScreen(BLACK);
+    footswitchDisplay.drawRect(0, 0, 480, 320, WHITE);
+    footswitchDisplay.setTextDatum(MC_DATUM);
+    footswitchDisplay.setTextColor(YELLOW);
+    footswitchDisplay.setTextSize(4);
+    footswitchDisplay.drawString("CONFIGURING...", 240, 160);
+    footswitchDisplay.deselect();
+    
+    // Update config display with configuring message
+    configDisplay.select();
+    configDisplay.fillScreen(BLACK);
+    configDisplay.drawRect(0, 0, 480, 320, WHITE);
+    configDisplay.setTextDatum(MC_DATUM);
+    configDisplay.setTextColor(YELLOW);
+    configDisplay.setTextSize(4);
+    configDisplay.drawString("CONFIGURING...", 240, 160);
+    configDisplay.deselect();
+}
+
+// Hide configuring message and restore normal displays
+void hideConfiguringMessage() {
+    isConfiguring = false;
+    drawFootswitchScreen();
+    drawConfigScreen();
+}
+
+// Show loading screen on both displays
+void showLoadingScreen() {
+    // Show loading screen on footswitch display
+    footswitchDisplay.select();
+    footswitchDisplay.fillScreen(BLACK);
+    footswitchDisplay.drawRect(0, 0, 480, 320, WHITE);
+    footswitchDisplay.setTextDatum(MC_DATUM);
+    footswitchDisplay.setTextColor(GREEN);
+    footswitchDisplay.setTextSize(4);
+    footswitchDisplay.drawString("LOADING...", 240, 120);
+    footswitchDisplay.setTextColor(WHITE);
+    footswitchDisplay.setTextSize(2);
+    footswitchDisplay.drawString("MIDI Footswitch Controller", 240, 180);
+    footswitchDisplay.setTextSize(1);
+    footswitchDisplay.drawString("Initializing System...", 240, 220);
+    footswitchDisplay.deselect();
+    
+    // Show loading screen on config display
+    configDisplay.select();
+    configDisplay.fillScreen(BLACK);
+    configDisplay.drawRect(0, 0, 480, 320, WHITE);
+    configDisplay.setTextDatum(MC_DATUM);
+    configDisplay.setTextColor(GREEN);
+    configDisplay.setTextSize(4);
+    configDisplay.drawString("LOADING...", 240, 120);
+    configDisplay.setTextColor(WHITE);
+    configDisplay.setTextSize(2);
+    configDisplay.drawString("MIDI Footswitch Controller", 240, 180);
+    configDisplay.setTextSize(1);
+    configDisplay.drawString("Initializing System...", 240, 220);
+    configDisplay.deselect();
 }

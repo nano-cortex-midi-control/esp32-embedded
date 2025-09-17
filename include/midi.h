@@ -43,19 +43,12 @@ struct FootswitchConfig {
 // Forward declaration for MIDI
 extern midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> MIDI;
 
-// External variable declarations
-extern const int FOOTSWITCH_PINS[NUM_FOOTSWITCHES];
+// Footswitch configuration and runtime variables are provided by switches module
 extern FootswitchConfig footswitches[NUM_FOOTSWITCHES];
-extern bool footswitchStates[NUM_FOOTSWITCHES];
-extern bool lastFootswitchStates[NUM_FOOTSWITCHES];
-extern unsigned long lastDebounceTime[NUM_FOOTSWITCHES];
-// Track currently selected footswitch (-1 if none)
-extern int currentSelectedFootswitch;
 
 // Function declarations
 void initializeMIDI();
 void sendMidiCC(int switchIndex);
-void handleFootswitches();
-void initializeFootswitchPins();
+
 
 #endif // MIDI_CONTROLLER_H

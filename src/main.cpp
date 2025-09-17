@@ -1,17 +1,22 @@
 #include <Arduino.h>
-#include "midi_controller.h"
+#include "midi.h"
 #include "display.h"
 #include "config.h"
+#include "uart.h"
 #include "utils.h"
+#include "switches.h"
 
 void setup() {
-    // Initialize serial communication
-    Serial.begin(115200);
-    printJsonLog("info", "MIDI Footswitch Controller Starting...");
-
-    // Initialize LED pin
+    // LED pin
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LOW);
+
+    // Initialize displays first to show loading screen
+    initializeDisplays();
+    // showLoadingScreen();
+
+    // Initialize UART for host commands
+    uart_init(UART_BAUD_RATE);
 
     // Initialize MIDI
     initializeMIDI();
@@ -19,42 +24,28 @@ void setup() {
     // Initialize footswitch pins
     initializeFootswitchPins();
 
-    // Initialize displays
-    initializeDisplays();
-
     // Load configuration from flash
     loadConfigFromFlash();
 
-    printJsonLog("info", "Ready for UART commands and footswitch input");
-    printJsonLog("info", "Send JSON commands via UART for configuration");
-
+    // Show normal displays after loading is complete
     updateConfigDisplay();
     updateFootswitchDisplay();
+
+    printJsonLog("info", "App initialized");
 }
 
 void loop() {
-    // Handle UART communication
-    while (Serial.available()) {
-        char inChar = (char)Serial.read();
-        if (inChar == '\n') {
-            uartComplete = true;
-        } else {
-            uartBuffer += inChar;
-        }
-    }
+    // Handle UART
+    uart_loop();
 
-    if (uartComplete) {
-        uartBuffer.trim();
-        if (uartBuffer.length() > 0) {
-            processUartCommand(uartBuffer);
-        }
-        uartBuffer = "";
-        uartComplete = false;
-    }
-
-    // Handle footswitch input
+    // Handle footswitch input and MIDI
     handleFootswitches();
 
-    // Small delay to prevent overwhelming the system
+    // Check configuring message timeout
+    if (isConfiguring && (millis() - configuringStartTime > 3000)) {
+        hideConfiguringMessage();
+    }
+
+    // Small delay to avoid busy-loop
     delay(1);
 }

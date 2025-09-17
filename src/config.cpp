@@ -1,7 +1,7 @@
 #include "config.h"
 #include "utils.h"
-#include "display.h"
-#include "midi_controller.h"
+#include "midi.h"
+#include "switches.h"
 
 // Preferences for storing configuration
 Preferences preferences;
@@ -108,66 +108,4 @@ void sendCurrentConfig() {
     String response;
     serializeJson(doc, response);
     Serial.println(response); // Already JSON, keep as is
-}
-
-void processUartCommand(String command) {
-    JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, command);
-
-    if (error) {
-        printJsonLog("error", "Invalid JSON");
-        return;
-    }
-
-    String type = doc["type"];
-
-    if (type == "get_config") {
-        blinkLed(BLINK_GET_CONFIG);
-        sendCurrentConfig();
-    }
-    else if (type == "set_config") {
-        JsonArray switches = doc["switches"];
-
-        if (switches.size() != NUM_FOOTSWITCHES) {
-            blinkLed(BLINK_ERROR);
-            printJsonLog("error", "Invalid number of switches");
-            return;
-        }
-
-        // Update configuration
-        for (int i = 0; i < NUM_FOOTSWITCHES; i++) {
-            JsonObject sw = switches[i];
-            footswitches[i].name = sw["name"].as<String>();
-            footswitches[i].midiChannel = sw["channel"];
-            footswitches[i].midiCC = sw["cc"];
-            footswitches[i].midiValue = sw["value"];
-            footswitches[i].enabled = sw["enabled"];
-            footswitches[i].color = hexStringToColor(sw["color"].as<String>());
-        }
-
-        saveConfigToFlash();
-        blinkLed(BLINK_SET_CONFIG);
-        updateFootswitchDisplay(); // Update display with new configuration
-        updateConfigDisplay();     // Update config display as well
-        printJsonLog("response", "Configuration updated");
-    }
-    else if (type == "test_switch") {
-        int switchId = doc["switch_id"];
-        if (switchId >= 0 && switchId < NUM_FOOTSWITCHES) {
-            blinkLed(BLINK_TEST_SWITCH);
-            sendMidiCC(switchId);
-            printJsonLog("response", "Switch " + String(switchId + 1) + " tested");
-        } else {
-            blinkLed(BLINK_ERROR);
-            printJsonLog("error", "Invalid switch ID");
-        }
-    }
-    else if (type == "ping") {
-        blinkLed(BLINK_PING);
-        printJsonLog("response", "Ping received");
-    }
-    else {
-        blinkLed(BLINK_ERROR);
-        printJsonLog("error", "Unknown command type");
-    }
 }
