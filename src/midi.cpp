@@ -19,9 +19,8 @@ void sendMidiCC(int switchIndex) {
     if (switchIndex < 0 || switchIndex >= NUM_FOOTSWITCHES) return;
     if (!footswitches[switchIndex].enabled) return;
 
-    MIDI.sendControlChange(
+    MIDI.sendProgramChange(
         footswitches[switchIndex].midiCC,
-        footswitches[switchIndex].midiValue,
         footswitches[switchIndex].midiChannel
     );
 
