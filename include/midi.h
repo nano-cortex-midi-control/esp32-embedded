@@ -25,7 +25,6 @@ struct FootswitchConfig {
     String name;
     uint8_t midiChannel;
     uint8_t midiCC;
-    uint8_t midiValue;
     bool enabled;
     uint16_t color;  // RGB565 color value
 };

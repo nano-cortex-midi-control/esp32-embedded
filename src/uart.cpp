@@ -62,7 +62,6 @@ void processUartCommand(String command) {
             footswitches[i].name = sw["name"].as<String>();
             footswitches[i].midiChannel = sw["channel"];
             footswitches[i].midiCC = sw["cc"];
-            footswitches[i].midiValue = sw["value"];
             footswitches[i].enabled = sw["enabled"];
             footswitches[i].color = hexStringToColor(sw["color"].as<String>());
         }

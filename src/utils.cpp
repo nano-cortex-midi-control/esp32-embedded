@@ -1,8 +1,5 @@
 #include "utils.h"
 
-// LED pin for feedback
-const int LED_PIN = 2;
-
 void printJsonLog(const String &type, const String &message) {
     JsonDocument doc;
     doc["type"] = type;
@@ -10,35 +7,6 @@ void printJsonLog(const String &type, const String &message) {
     String output;
     serializeJson(doc, output);
     Serial.println(output);
-}
-
-void blinkLed(BlinkType type) {
-    int count = 1;
-    int onTime = 100;
-    int offTime = 100;
-    switch (type) {
-        case BLINK_GET_CONFIG:
-            count = 1; onTime = 100; offTime = 150;
-            break;
-        case BLINK_SET_CONFIG:
-            count = 2; onTime = 100; offTime = 150;
-            break;
-        case BLINK_TEST_SWITCH:
-            count = 1; onTime = 400; offTime = 200;
-            break;
-        case BLINK_PING:
-            count = 1; onTime = 100; offTime = 100;
-            break;
-        case BLINK_ERROR:
-            count = 3; onTime = 60; offTime = 80;
-            break;
-    }
-    for (int i = 0; i < count; i++) {
-        digitalWrite(LED_PIN, HIGH);
-        delay(onTime);
-        digitalWrite(LED_PIN, LOW);
-        if (i < count - 1) delay(offTime);
-    }
 }
 
 // Convert hex string to RGB565 color

@@ -25,6 +25,5 @@ void sendMidiCC(int switchIndex) {
     );
 
     printJsonLog("midi", "MIDI CC sent: Ch" + String(footswitches[switchIndex].midiChannel) +
-        " CC" + String(footswitches[switchIndex].midiCC) +
-        " Val" + String(footswitches[switchIndex].midiValue));
+        " CC" + String(footswitches[switchIndex].midiCC));
 }

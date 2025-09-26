@@ -15,7 +15,6 @@ void initializeDefaultConfig() {
         footswitches[i].name = defaultNames[i];
         footswitches[i].midiChannel = 1;
         footswitches[i].midiCC = 20 + i; // CC 20-25 by default
-        footswitches[i].midiValue = 127;
         footswitches[i].enabled = true;
         footswitches[i].color = defaultColors[i];
     }
@@ -34,7 +33,6 @@ void saveConfigToFlash() {
         sw["name"] = footswitches[i].name;
         sw["channel"] = footswitches[i].midiChannel;
         sw["cc"] = footswitches[i].midiCC;
-        sw["value"] = footswitches[i].midiValue;
         sw["enabled"] = footswitches[i].enabled;
         sw["color"] = colorToHexString(footswitches[i].color);
     }
@@ -75,7 +73,6 @@ void loadConfigFromFlash() {
         footswitches[i].name = sw["name"].as<String>();
         footswitches[i].midiChannel = sw["channel"];
         footswitches[i].midiCC = sw["cc"];
-        footswitches[i].midiValue = sw["value"];
         footswitches[i].enabled = sw["enabled"];
         footswitches[i].color = hexStringToColor(sw["color"].as<String>());
     }
@@ -93,7 +90,6 @@ void sendCurrentConfig() {
         sw["name"] = footswitches[i].name;
         sw["channel"] = footswitches[i].midiChannel;
         sw["cc"] = footswitches[i].midiCC;
-        sw["value"] = footswitches[i].midiValue;
         sw["enabled"] = footswitches[i].enabled;
         sw["color"] = colorToHexString(footswitches[i].color);
     }
