@@ -1,43 +1,44 @@
-// ...existing code...
 #include "switches.h"
 #include "midi.h"
 #include "utils.h"
 #include "display.h"
 
-// Expected analog value ranges for each switch (tune these based on your resistor values)
-const int FOOTSWITCH_THRESHOLDS[NUM_FOOTSWITCHES + 1] = {
-    0,    // Min value for switch 0
-    200,  // Min value for switch 1
-    400,  // Min value for switch 2
-    600,  // Min value for switch 3
-    800,  // Min value for switch 4
-    1000, // Min value for switch 5
-    4096  // Max ADC value (ESP32 ADC is 12-bit)
-};
 
 // Footswitch state tracking
-int lastPressedFootswitch = -1;
 unsigned long lastDebounceTime = 0;
-int currentSelectedFootswitch = -1;
-bool isConfiguring = false;
-unsigned long configuringStartTime = 0;
+int8_t lastPressedFootswitch = -1;
+uint8_t currentSelectedFootswitch = 0;
+
+#define DIVIDER(R1) (4095 * 10000 / (R1 + 10000)) // Assuming R2 = 10k ohm
+#define IN_RANGE(val, target, range) ((val) >= (target) - (range) && (val) <= (target) + (range))
 
 void initializeFootswitchPins() {
-    pinMode(FOOTSWITCH_LADDER_PIN, INPUT);
-    printJsonLog("info", "Footswitch resistor ladder initialized");
+    pinMode(FOOTSWITCH_LADDER_PIN, INPUT_PULLDOWN);
+}
+
+const int thresholds[NUM_FOOTSWITCHES] = {
+    DIVIDER(0),
+    DIVIDER(1000),
+    DIVIDER(2200),
+    DIVIDER(4700),
+    DIVIDER(8200),
+    DIVIDER(10000)
+};
+
+int8_t readFootswitchLadder() {
+    int adcValue = analogRead(FOOTSWITCH_LADDER_PIN);
+
+    for (uint8_t i = 0; i < NUM_FOOTSWITCHES; i++) {
+        // if ADC value is within ±100 of threshold, return switch index
+        if (IN_RANGE(adcValue, thresholds[i], 100)) {
+            return i;
+        }
+    }
+    return -1; // No footswitch pressed
 }
 
 void handleFootswitches() {
-    int analogValue = analogRead(FOOTSWITCH_LADDER_PIN);
-    int pressedFootswitch = -1;
-
-    // Determine which switch is pressed based on analog value
-    for (int i = 0; i < NUM_FOOTSWITCHES; i++) {
-        if (analogValue >= FOOTSWITCH_THRESHOLDS[i] && analogValue < FOOTSWITCH_THRESHOLDS[i + 1]) {
-            pressedFootswitch = i;
-            break;
-        }
-    }
+    int8_t pressedFootswitch = readFootswitchLadder();
 
     // Debounce logic
     if (pressedFootswitch != lastPressedFootswitch) {
@@ -49,11 +50,7 @@ void handleFootswitches() {
             // Switch pressed
             currentSelectedFootswitch = pressedFootswitch;
             sendMidiCC(currentSelectedFootswitch);
-            updateConfigDisplay();
-        } else if (pressedFootswitch == -1 && currentSelectedFootswitch != -1) {
-            // Switch released
-            // currentSelectedFootswitch = -1;
-            // updateConfigDisplay();
+            drawConfigScreen();
         }
     }
 

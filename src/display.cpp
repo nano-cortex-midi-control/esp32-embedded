@@ -6,6 +6,11 @@
 MultiTFT footswitchDisplay(TFT_CS1);  // Display for footswitch states
 MultiTFT configDisplay(TFT_CS2);      // Display for bank/config info
 
+bool isConfiguring = false;
+unsigned long configuringStartTime = 0;
+bool isLoading = false;
+unsigned long loadingStartTime = 0;
+
 // Helper: extract RGB components from RGB565 and compute brightness
 static uint16_t computeBrightnessFromRGB565(uint16_t color) {
     uint8_t r = (color >> 8) & 0xF8;
@@ -79,11 +84,8 @@ void drawFootswitchScreen() {
 void drawConfigScreen() {
     configDisplay.select();
 
-    // Determine background color; if no selection use BLACK
-    uint16_t backgroundColor = BLACK;
-    if (currentSelectedFootswitch >= 0 && currentSelectedFootswitch < NUM_FOOTSWITCHES) {
-        backgroundColor = footswitches[currentSelectedFootswitch].color;
-    }
+    // Determine background color based on current selected footswitch
+    uint16_t backgroundColor = footswitches[currentSelectedFootswitch].color;
 
     configDisplay.fillScreen(backgroundColor);
 
@@ -92,11 +94,7 @@ void drawConfigScreen() {
 
     configDisplay.drawRect(0, 0, 480, 320, primaryTextColor);
 
-    // Title (guard against invalid selection)
-    String title = "";
-    if (currentSelectedFootswitch >= 0 && currentSelectedFootswitch < NUM_FOOTSWITCHES) {
-        title = footswitches[currentSelectedFootswitch].name;
-    }
+    String title = footswitches[currentSelectedFootswitch].name;
     drawCenteredTitle(configDisplay, title, primaryTextColor, 40);
 
     // Count active switches and build truncated list
@@ -138,16 +136,6 @@ void drawConfigScreen() {
     configDisplay.deselect();
 }
 
-// Update footswitch display when states change
-void updateFootswitchDisplay() {
-    drawFootswitchScreen();
-}
-
-// Update config display (can be called when configuration changes)
-void updateConfigDisplay() {
-    drawConfigScreen();
-}
-
 // Small helper to show a centered message on a display
 static void showCenteredMessage(MultiTFT &display, const char *message, uint16_t color, int y) {
     display.fillScreen(BLACK);
@@ -181,6 +169,9 @@ void hideConfiguringMessage() {
 
 // Show loading screen on both displays
 void showLoadingScreen() {
+    isLoading = true;
+    loadingStartTime = millis();
+
     footswitchDisplay.select();
     footswitchDisplay.fillScreen(BLACK);
     footswitchDisplay.drawRect(0, 0, 480, 320, WHITE);
@@ -208,4 +199,10 @@ void showLoadingScreen() {
     configDisplay.setTextSize(1);
     configDisplay.drawString("Initializing System...", 240, 220);
     configDisplay.deselect();
+}
+
+void hideLoadingScreen() {
+    isLoading = false;
+    drawFootswitchScreen();
+    drawConfigScreen();
 }

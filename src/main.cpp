@@ -7,13 +7,11 @@
 #include "switches.h"
 
 void setup() {
-    // LED pin
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, LOW);
-
     // Initialize displays first to show loading screen
     initializeDisplays();
-    // showLoadingScreen();
+
+    // Show loading screen
+    showLoadingScreen();
 
     // Initialize UART for host commands
     uart_init(UART_BAUD_RATE);
@@ -28,8 +26,8 @@ void setup() {
     loadConfigFromFlash();
 
     // Show normal displays after loading is complete
-    updateConfigDisplay();
-    updateFootswitchDisplay();
+    drawConfigScreen();
+    drawFootswitchScreen();
 
     printJsonLog("info", "App initialized");
 }
@@ -41,9 +39,11 @@ void loop() {
     // Handle footswitch input and MIDI
     handleFootswitches();
 
-    // Check configuring message timeout
+    // Check timeout for configuring/loading messages
     if (isConfiguring && (millis() - configuringStartTime > 3000)) {
         hideConfiguringMessage();
+    } else if (isLoading && (millis() - loadingStartTime > 2000)) {
+        hideLoadingScreen();
     }
 
     // Small delay to avoid busy-loop

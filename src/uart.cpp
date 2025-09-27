@@ -44,14 +44,12 @@ void processUartCommand(String command) {
     String type = doc["type"];
 
     if (type == "get_config") {
-        blinkLed(BLINK_GET_CONFIG);
         sendCurrentConfig();
     }
     else if (type == "set_config") {
         JsonArray switches = doc["switches"];
 
         if (switches.size() != NUM_FOOTSWITCHES) {
-            blinkLed(BLINK_ERROR);
             printJsonLog("error", "Invalid number of switches");
             return;
         }
@@ -67,27 +65,22 @@ void processUartCommand(String command) {
         }
 
         saveConfigToFlash();
-        blinkLed(BLINK_SET_CONFIG);
         showConfiguringMessage(); // Show configuring message for 3 seconds
         printJsonLog("response", "Configuration updated");
     }
     else if (type == "test_switch") {
         int switchId = doc["switch_id"];
         if (switchId >= 0 && switchId < NUM_FOOTSWITCHES) {
-            blinkLed(BLINK_TEST_SWITCH);
             sendMidiCC(switchId);
             printJsonLog("response", "Switch " + String(switchId + 1) + " tested");
         } else {
-            blinkLed(BLINK_ERROR);
             printJsonLog("error", "Invalid switch ID");
         }
     }
     else if (type == "ping") {
-        blinkLed(BLINK_PING);
         printJsonLog("response", "Ping received");
     }
     else {
-        blinkLed(BLINK_ERROR);
         printJsonLog("error", "Unknown command type");
     }
 }
