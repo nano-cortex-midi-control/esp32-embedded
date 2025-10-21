@@ -5,6 +5,7 @@
 #include "uart.h"
 #include "utils.h"
 #include "switches.h"
+#include "rgb_led_mux.h"
 
 void setup() {
     // Initialize displays first to show loading screen
@@ -12,6 +13,12 @@ void setup() {
 
     // Show loading screen
     showLoadingScreen();
+
+    // Initialize RGB LED multiplexer
+    initializeRGBLEDMux();
+    
+    // LED startup sequence
+    ledStartupSequence();
 
     // Initialize UART for host commands
     uart_init(UART_BAUD_RATE);
@@ -33,6 +40,9 @@ void setup() {
 }
 
 void loop() {
+    // Update RGB LED multiplexer (must be called frequently for smooth operation)
+    ledMux.update();
+    
     // Handle UART
     uart_loop();
 
