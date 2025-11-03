@@ -48,7 +48,7 @@ void RGBLEDMultiplexer::begin(int redPin, int greenPin, int bluePin, int* enable
     for (int i = 0; i < NUM_LEDS; i++) {
         if (this->enablePins[i] >= 0) {
             pinMode(this->enablePins[i], OUTPUT);
-            digitalWrite(this->enablePins[i], LOW); // Disable all LEDs initially
+            digitalWrite(this->enablePins[i], HIGH); // Disable all LEDs initially
         }
     }
     
@@ -62,13 +62,13 @@ void RGBLEDMultiplexer::selectLED(int ledIndex) {
     // Disable all LEDs first
     for (int i = 0; i < NUM_LEDS; i++) {
         if (enablePins[i] >= 0) {
-            digitalWrite(enablePins[i], LOW);
+            digitalWrite(enablePins[i], HIGH);
         }
     }
     
     // Enable the selected LED
     if (enablePins[ledIndex] >= 0) {
-        digitalWrite(enablePins[ledIndex], HIGH);
+        digitalWrite(enablePins[ledIndex], LOW);
     }
 }
 
@@ -78,10 +78,10 @@ void RGBLEDMultiplexer::setRGBOutput(const LEDColor& color, uint8_t brightness) 
     int green = (color.green * brightness) / 255;
     int blue = (color.blue * brightness) / 255;
     
-    // Set PWM values (assuming common cathode LEDs)
-    analogWrite(redPin, red);
-    analogWrite(greenPin, green);
-    analogWrite(bluePin, blue);
+    // Invert values for common anode configuration (0 = ON, 255 = OFF)
+    analogWrite(redPin, 255 - red);
+    analogWrite(greenPin, 255 - green);
+    analogWrite(bluePin, 255 - blue);
 }
 
 void RGBLEDMultiplexer::updateBlink(int ledIndex) {
@@ -181,7 +181,7 @@ void RGBLEDMultiplexer::allOff() {
 void RGBLEDMultiplexer::allOn(const LEDColor& color, LEDState state) {
     for (int i = 0; i < NUM_LEDS; i++) {
         setLED(i, color, state);
-    }
+    } 
 }
 
 void RGBLEDMultiplexer::update() {
