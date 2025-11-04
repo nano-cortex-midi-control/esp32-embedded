@@ -23,6 +23,11 @@ void hideConfiguringMessage();
 void showLoadingScreen();
 void hideLoadingScreen();
 
+// Calibration display functions
+void showCalibrationScreen(int buttonNum, bool success);
+void showCalibrationWarning(const char* message);
+void showCalibrationComplete();
+
 // Helper function for determining text color based on background brightness
 uint16_t getTextColorForBackground(uint16_t backgroundColor);
 

@@ -206,3 +206,124 @@ void hideLoadingScreen() {
     drawFootswitchScreen();
     drawConfigScreen();
 }
+
+// Show calibration screen prompting for button press
+void showCalibrationScreen(int buttonNum, bool success) {
+    String buttonNames[] = {"TOP LEFT", "TOP MIDDLE", "TOP RIGHT", "BOTTOM LEFT", "BOTTOM MIDDLE", "BOTTOM RIGHT"};
+    
+    configDisplay.select();
+    configDisplay.fillScreen(BLACK);
+    configDisplay.drawRect(0, 0, 480, 320, WHITE);
+    
+    configDisplay.setTextDatum(MC_DATUM);
+    configDisplay.setTextColor(YELLOW);
+    configDisplay.setTextSize(3);
+    configDisplay.drawString("CALIBRATION", 240, 40);
+    
+    if (success) {
+        configDisplay.setTextColor(GREEN);
+        configDisplay.setTextSize(4);
+        configDisplay.drawString("SUCCESS!", 240, 100);
+        configDisplay.setTextSize(2);
+        configDisplay.setTextColor(WHITE);
+        configDisplay.drawString(buttonNames[buttonNum] + " calibrated", 240, 160);
+    } else {
+        configDisplay.setTextColor(WHITE);
+        configDisplay.setTextSize(3);
+        configDisplay.drawString("Press and hold:", 240, 100);
+        configDisplay.setTextColor(CYAN);
+        configDisplay.setTextSize(4);
+        configDisplay.drawString(buttonNames[buttonNum], 240, 160);
+        
+        configDisplay.setTextColor(WHITE);
+        configDisplay.setTextSize(2);
+        configDisplay.drawString("(" + String(buttonNum + 1) + " of " + String(NUM_FOOTSWITCHES) + ")", 240, 220);
+    }
+    
+    configDisplay.deselect();
+    
+    // Also show on footswitch display
+    footswitchDisplay.select();
+    footswitchDisplay.fillScreen(BLACK);
+    footswitchDisplay.drawRect(0, 0, 480, 320, WHITE);
+    
+    footswitchDisplay.setTextDatum(MC_DATUM);
+    footswitchDisplay.setTextColor(YELLOW);
+    footswitchDisplay.setTextSize(3);
+    footswitchDisplay.drawString("CALIBRATION", 240, 80);
+    
+    if (success) {
+        footswitchDisplay.setTextColor(GREEN);
+        footswitchDisplay.setTextSize(4);
+        footswitchDisplay.drawString("OK", 240, 160);
+    } else {
+        footswitchDisplay.setTextColor(CYAN);
+        footswitchDisplay.setTextSize(4);
+        footswitchDisplay.drawString(buttonNames[buttonNum], 240, 160);
+    }
+    
+    footswitchDisplay.deselect();
+}
+
+// Show calibration warning message
+void showCalibrationWarning(const char* message) {
+    configDisplay.select();
+    configDisplay.fillScreen(BLACK);
+    configDisplay.drawRect(0, 0, 480, 320, WHITE);
+    
+    configDisplay.setTextDatum(MC_DATUM);
+    configDisplay.setTextColor(RED);
+    configDisplay.setTextSize(4);
+    configDisplay.drawString("WARNING!", 240, 100);
+    
+    configDisplay.setTextColor(YELLOW);
+    configDisplay.setTextSize(2);
+    configDisplay.drawString(message, 240, 160);
+    
+    configDisplay.deselect();
+    
+    footswitchDisplay.select();
+    footswitchDisplay.fillScreen(BLACK);
+    footswitchDisplay.drawRect(0, 0, 480, 320, WHITE);
+    
+    footswitchDisplay.setTextDatum(MC_DATUM);
+    footswitchDisplay.setTextColor(RED);
+    footswitchDisplay.setTextSize(4);
+    footswitchDisplay.drawString("WARNING!", 240, 120);
+    
+    footswitchDisplay.setTextColor(YELLOW);
+    footswitchDisplay.setTextSize(2);
+    footswitchDisplay.drawString(message, 240, 180);
+    
+    footswitchDisplay.deselect();
+}
+
+// Show calibration complete screen
+void showCalibrationComplete() {
+    configDisplay.select();
+    configDisplay.fillScreen(BLACK);
+    configDisplay.drawRect(0, 0, 480, 320, WHITE);
+    
+    configDisplay.setTextDatum(MC_DATUM);
+    configDisplay.setTextColor(GREEN);
+    configDisplay.setTextSize(4);
+    configDisplay.drawString("CALIBRATION", 240, 100);
+    configDisplay.drawString("COMPLETE!", 240, 160);
+    
+    configDisplay.setTextColor(WHITE);
+    configDisplay.setTextSize(2);
+    configDisplay.drawString("Starting normal operation...", 240, 220);
+    
+    configDisplay.deselect();
+    
+    footswitchDisplay.select();
+    footswitchDisplay.fillScreen(BLACK);
+    footswitchDisplay.drawRect(0, 0, 480, 320, WHITE);
+    
+    footswitchDisplay.setTextDatum(MC_DATUM);
+    footswitchDisplay.setTextColor(GREEN);
+    footswitchDisplay.setTextSize(4);
+    footswitchDisplay.drawString("COMPLETE!", 240, 160);
+    
+    footswitchDisplay.deselect();
+}

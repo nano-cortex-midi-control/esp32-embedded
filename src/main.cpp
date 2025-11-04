@@ -29,6 +29,15 @@ void setup() {
     // Initialize footswitch pins
     initializeFootswitchPins();
 
+    // Check if calibration is needed (first boot)
+    if (!isCalibrationDataValid()) {
+        printJsonLog("info", "No calibration data found, starting calibration");
+        performCalibration();
+    } else {
+        printJsonLog("info", "Loading calibration data");
+        loadCalibrationData();
+    }
+
     // Load configuration from flash
     loadConfigFromFlash();
 
